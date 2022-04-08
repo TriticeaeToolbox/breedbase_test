@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  test_breedbase:
+    image: breedbase/breedbase:v0.46
+    container_name: test_breedbase
+    entrypoint: ["/bin/bash", "-c", "mkdir -p logs && ((perl t/test_fixture.pl t/unit_fixture/ | tee logs/test.fixture.log) 3>&1 1>&2 2>&3 | tee logs/test.fixture.err) && ((perl t/test_fixture.pl t/unit_mech/ | tee logs/test.mech.log) 3>&1 1>&2 2>&3 | tee logs/test.mech.err)"]
+    depends_on:
+      test_breedbase_db:
+        condition: service_healthy
+    volumes:
+      - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
+      - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
+      - ./logs/:/home/production/cxgn/sgn/logs/
+  test_breedbase_db:
+    image: postgres:12
+    container_name: test_breedbase_db
+    shm_size: '1gb'
+    healthcheck:
+      test: "pg_isready -U postgres || exit 1"
+      interval: 10s
+    environment: 
+      POSTGRES_PASSWORD: postgres
