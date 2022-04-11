@@ -1,24 +1,42 @@
 version: "3.7"
 
 services:
-  test_breedbase:
+  breedbase_test_fixture:
     image: triticeaetoolbox/breedbase_web:latest
-    container_name: test_breedbase
+    container_name: breedbase_test_fixture
     command: "t/unit_fixture/"
-    # command: "t/unit_mech/"
     environment:
       PGPASSWORD: postgres
     depends_on:
-      test_breedbase_db:
+      breedbase_test_db:
+        condition: service_healthy
+    healthcheck:
+      test: /bin/true
+      interval: 60s
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
+      - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
+      - ./logs_fixture/:/home/production/cxgn/sgn/logs/
+  breedbase_test_mech:
+    image: triticeaetoolbox/breedbase_web:latest
+    container_name: breedbase_test_mech
+    command: "t/unit_mech/"
+    environment:
+      PGPASSWORD: postgres
+    depends_on:
+      breedbase_test_db:
+        condition: service_healthy
+      breedbase_test_fixture:
         condition: service_healthy
     volumes:
       - ./entrypoint.sh:/entrypoint.sh
       - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
       - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
-      - ./logs/:/home/production/cxgn/sgn/logs/
-  test_breedbase_db:
+      - ./logs_mech/:/home/production/cxgn/sgn/logs/
+  breedbase_test_db:
     image: postgres:12
-    container_name: test_breedbase_db
+    container_name: breedbase_test_db
     shm_size: '1gb'
     healthcheck:
       test: "pg_isready -U postgres || exit 1"

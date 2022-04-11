@@ -1,3 +1,5 @@
 .DS_Store
-/logs/*
-!/logs/.gitkeep
+/logs_fixture/*
+!/logs_fixture/.gitkeep
+/logs_mech/*
+!/logs_mech/.gitkeep
