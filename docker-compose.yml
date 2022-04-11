@@ -4,7 +4,10 @@ services:
   test_breedbase:
     image: triticeaetoolbox/breedbase_web:latest
     container_name: test_breedbase
-    entrypoint: ["/bin/bash", "-c", "/entrypoint.sh && mkdir -p logs && ((perl t/test_fixture.pl t/unit_fixture/ | tee logs/test.fixture.log) 3>&1 1>&2 2>&3 | tee logs/test.fixture.err) && ((perl t/test_fixture.pl t/unit_mech/ | tee logs/test.mech.log) 3>&1 1>&2 2>&3 | tee logs/test.mech.err)"]
+    command: "t/unit_fixture/"
+    # command: "t/unit_mech/"
+    environment:
+      PGPASSWORD: postgres
     depends_on:
       test_breedbase_db:
         condition: service_healthy
