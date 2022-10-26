@@ -3,3 +3,4 @@
 !/logs_fixture/.gitkeep
 /logs_mech/*
 !/logs_mech/.gitkeep
+/repos

@@ -18,8 +18,19 @@ The following configuration parameters in the `docker-compose.yml` will need to 
 
 ## Usage
 
-`docker-compose up` will start the database and test instances and will automatically run the specified test(s).  The output from the tests will be written to the local `./logs*` directory.
+`docker compose up` will start the database and test instances and will automatically run the specified test(s).  The output from the tests will be written to the local `./logs*` directory.
 
 - test.log - contains the combined STDOUT and STDERR output
 - test.out - contains just STDOUT (useful for getting the summary output from each test)
 - test.err - contains just STDERR (useful for getting details from a specific test)
+
+## Testing Development Code
+
+By default, the test containers will test the code in the specified docker image.  If you want to test code that is in development (from an sgn repository on the host), you can mount the sgn repo from its location on the host to `/home/production/cxgn/sgn` in both of the containers (breedbase_test_fixture and breedbase_test_mech).
+
+**HOWEVER, the two test containers cannot be run concurrently with the same sgn repo mounted** - *each test container will need to be run separately*.
+
+```
+docker compose up breedbase_test_fixture
+docker compose up breedbase_test_mech
+```
