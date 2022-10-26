@@ -1,6 +1,8 @@
 version: "3.7"
 
 services:
+
+  ## FIXTURE TESTS ##
   breedbase_test_fixture:
     image: triticeaetoolbox/breedbase_web:latest
     container_name: breedbase_test_fixture
@@ -19,6 +21,8 @@ services:
       - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
       - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
       - ./logs_fixture/:/home/production/cxgn/sgn/logs/
+
+  ## MECH TESTS ##
   breedbase_test_mech:
     image: triticeaetoolbox/breedbase_web:latest
     container_name: breedbase_test_mech
@@ -28,14 +32,40 @@ services:
     depends_on:
       breedbase_test_db:
         condition: service_healthy
-      breedbase_test_fixture:
-        condition: service_healthy
     volumes:
       # - ./repos/sgn:/home/production/cxgn/sgn
       - ./entrypoint.sh:/entrypoint.sh
       - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
       - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
       - ./logs_mech/:/home/production/cxgn/sgn/logs/
+
+  ## SELENIUM TESTS ##
+  breedbase_test_selenium:
+    image: triticeaetoolbox/breedbase_web:latest
+    container_name: breedbase_test_selenium
+    command: "t/selenium2/"
+    environment:
+      PGPASSWORD: postgres
+      SGN_REMOTE_SERVER_ADDR: breedbase_test_selenium_server
+      SGN_TEST_SERVER: http://breedbase_test_selenium:3010
+    depends_on:
+      breedbase_test_db:
+        condition: service_healthy
+      breedbase_test_selenium_server:
+        condition: service_healthy
+    volumes:
+      # - ./repos/sgn:/home/production/cxgn/sgn
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
+      - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
+      - ./logs_selenium/:/home/production/cxgn/sgn/logs/
+
+  breedbase_test_selenium_server:
+    image: selenium/standalone-firefox:3.141.59
+    container_name: breedbase_test_selenium_server
+    healthcheck:
+      test: "curl --silent --head http://localhost:4444 || exit 1"
+
   breedbase_test_db:
     image: postgres:12
     container_name: breedbase_test_db
