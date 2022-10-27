@@ -2,6 +2,23 @@ version: "3.7"
 
 services:
 
+  ## UNIT TESTS ##
+  breedbase_test_unit:
+    image: triticeaetoolbox/breedbase_web:latest
+    container_name: breedbase_test_unit
+    command: "t/unit"
+    environment:
+      PGPASSWORD: postgres
+    depends_on:
+      breedbase_test_db:
+        condition: service_healthy
+    volumes:
+      # - ./repos/sgn:/home/production/cxgn/sgn
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
+      - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
+      - ./logs_unit/:/home/production/cxgn/sgn/logs/
+
   ## FIXTURE TESTS ##
   breedbase_test_fixture:
     image: triticeaetoolbox/breedbase_web:latest
@@ -12,9 +29,6 @@ services:
     depends_on:
       breedbase_test_db:
         condition: service_healthy
-    healthcheck:
-      test: /bin/true
-      interval: 60s
     volumes:
       # - ./repos/sgn:/home/production/cxgn/sgn
       - ./entrypoint.sh:/entrypoint.sh
