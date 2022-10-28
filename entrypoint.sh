@@ -25,4 +25,4 @@ mkdir -p "$tmp_run"; chown www-data:www-data "$tmp_run"
 # Run the tests
 mkdir -p logs
 echo "====> RUNNING TEST: ${@}"
-script -O logs/test.log -c "((perl t/test_fixture.pl \"$@\" | tee logs/test.out) 3>&1 1>&2 2>&3 | tee logs/test.err)"
+script -O logs/test.log -c "((perl t/test_fixture.pl --nopatch \"$@\" | tee logs/test.out) 3>&1 1>&2 2>&3 | tee logs/test.err)"

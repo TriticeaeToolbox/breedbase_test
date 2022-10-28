@@ -2,15 +2,44 @@ version: "3.7"
 
 services:
 
+  ## TEST DATABASE SETUP ##
+  breedbase_test_setup:
+    image: triticeaetoolbox/breedbase_web:latest
+    container_name: breedbase_test_setup
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      PGPASSWORD: ${PGPASSWORD}
+      DB_UNIT: ${DB_UNIT}
+      DB_FIXTURE: ${DB_FIXTURE}
+      DB_MECH: ${DB_MECH}
+      DB_SELENIUM: ${DB_SELENIUM}
+    depends_on:
+      breedbase_test_db:
+        condition: service_healthy
+    healthcheck:
+      test: bash -c "[ -f /ready ]"
+      start_period: 5s
+      timeout: 5s
+      retries: 1
+    volumes:
+      # - ./repos/sgn:/home/production/cxgn/sgn
+      - ./entrypoint_setup.sh:/entrypoint.sh
+      - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
+      - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
+
   ## UNIT TESTS ##
   breedbase_test_unit:
     image: triticeaetoolbox/breedbase_web:latest
     container_name: breedbase_test_unit
     command: "t/unit"
     environment:
-      PGPASSWORD: postgres
+      TEST_DB_NAME: ${DB_UNIT}
+      PGPASSWORD: ${PGPASSWORD}
     depends_on:
       breedbase_test_db:
+        condition: service_healthy
+      breedbase_test_setup:
         condition: service_healthy
     volumes:
       # - ./repos/sgn:/home/production/cxgn/sgn
@@ -25,9 +54,12 @@ services:
     container_name: breedbase_test_fixture
     command: "t/unit_fixture/"
     environment:
-      PGPASSWORD: postgres
+      TEST_DB_NAME: ${DB_FIXTURE}
+      PGPASSWORD: ${PGPASSWORD}
     depends_on:
       breedbase_test_db:
+        condition: service_healthy
+      breedbase_test_setup:
         condition: service_healthy
     volumes:
       # - ./repos/sgn:/home/production/cxgn/sgn
@@ -42,9 +74,12 @@ services:
     container_name: breedbase_test_mech
     command: "t/unit_mech/"
     environment:
-      PGPASSWORD: postgres
+      TEST_DB_NAME: ${DB_MECH}
+      PGPASSWORD: ${PGPASSWORD}
     depends_on:
       breedbase_test_db:
+        condition: service_healthy
+      breedbase_test_setup:
         condition: service_healthy
     volumes:
       # - ./repos/sgn:/home/production/cxgn/sgn
@@ -59,11 +94,14 @@ services:
     container_name: breedbase_test_selenium
     command: "t/selenium2/"
     environment:
-      PGPASSWORD: postgres
+      TEST_DB_NAME: ${DB_SELENIUM}
+      PGPASSWORD: ${PGPASSWORD}
       SGN_REMOTE_SERVER_ADDR: breedbase_test_selenium_server
       SGN_TEST_SERVER: http://breedbase_test_selenium:3010
     depends_on:
       breedbase_test_db:
+        condition: service_healthy
+      breedbase_test_setup:
         condition: service_healthy
       breedbase_test_selenium_server:
         condition: service_healthy
