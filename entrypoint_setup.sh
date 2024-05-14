@@ -29,7 +29,7 @@ echo "... loading fixture"
 cat "$fixture_path" | psql -h $DB_HOST -U postgres $DB_NAME > /dev/null
 
 echo "... running database patches"
-faketty perl $db_patch_bin -u postgres -p $PGPASSWORD -h $DB_HOST -d $DB_NAME -e janedoe
+faketty perl $db_patch_bin -u postgres -p $PGPASSWORD -h $DB_HOST -d $DB_NAME -e janedoe -s 159
 
 if [ ! -z "$DB_UNIT" ]; then
     echo "... creating unit database"

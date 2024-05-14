@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
 
   ## TEST DATABASE SETUP ##
@@ -23,7 +21,7 @@ services:
       timeout: 5s
       retries: 1
     volumes:
-      # - ./repos/sgn:/home/production/cxgn/sgn
+      - ./repos/sgn:/home/production/cxgn/sgn
       - ./entrypoint_setup.sh:/entrypoint.sh
       - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
       - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
@@ -32,7 +30,7 @@ services:
   breedbase_test_unit:
     image: triticeaetoolbox/breedbase_web:latest
     container_name: breedbase_test_unit
-    command: "t/unit"
+    command: "t/unit/"
     environment:
       TEST_DB_NAME: ${DB_UNIT}
       PGPASSWORD: ${PGPASSWORD}
@@ -42,7 +40,7 @@ services:
       breedbase_test_setup:
         condition: service_healthy
     volumes:
-      # - ./repos/sgn:/home/production/cxgn/sgn
+      - ./repos/sgn:/home/production/cxgn/sgn
       - ./entrypoint.sh:/entrypoint.sh
       - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
       - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
@@ -54,6 +52,7 @@ services:
     container_name: breedbase_test_fixture
     command: "t/unit_fixture/"
     environment:
+      MODE: 'TESTING'
       TEST_DB_NAME: ${DB_FIXTURE}
       PGPASSWORD: ${PGPASSWORD}
     depends_on:
@@ -62,7 +61,7 @@ services:
       breedbase_test_setup:
         condition: service_healthy
     volumes:
-      # - ./repos/sgn:/home/production/cxgn/sgn
+      - ./repos/sgn:/home/production/cxgn/sgn
       - ./entrypoint.sh:/entrypoint.sh
       - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
       - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
@@ -82,7 +81,7 @@ services:
       breedbase_test_setup:
         condition: service_healthy
     volumes:
-      # - ./repos/sgn:/home/production/cxgn/sgn
+      - ./repos/sgn:/home/production/cxgn/sgn
       - ./entrypoint.sh:/entrypoint.sh
       - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
       - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
@@ -106,15 +105,17 @@ services:
       breedbase_test_selenium_server:
         condition: service_healthy
     volumes:
-      # - ./repos/sgn:/home/production/cxgn/sgn
+      - ./repos/sgn:/home/production/cxgn/sgn
       - ./entrypoint.sh:/entrypoint.sh
       - ./conf/sgn_local.conf:/home/production/cxgn/sgn/sgn_local.conf
       - ./conf/sgn_test.conf:/home/production/cxgn/sgn/sgn_test.conf
       - ./logs_selenium/:/home/production/cxgn/sgn/logs/
 
   breedbase_test_selenium_server:
-    image: selenium/standalone-firefox:3.141.59
+    image: selenium/standalone-firefox:97.0
     container_name: breedbase_test_selenium_server
+    volumes:
+      - ./repos/sgn/t/data:/home/production/cxgn/sgn/t/data
     healthcheck:
       test: "curl --silent --head http://localhost:4444 || exit 1"
 
